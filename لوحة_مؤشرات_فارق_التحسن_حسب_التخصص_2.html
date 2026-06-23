@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة مؤشرات فارق التحسّن حسب التخصص — برنامج المعلمين الجدد</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --card:#ffffff; --ink:#1a2230; --muted:#5b6472; --muted2:#6b7688;
+    --line:#e2e8f0; --brand:#1F4E79; --brand2:#2E75B6; --pos:#1D9E75; --posd:#0F6E56; --neg:#E24B4A; --negd:#A32D2D;
+    --chipbg:#eef3f9;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:"Segoe UI","Tahoma",Arial,sans-serif; background:var(--bg); color:var(--ink); line-height:1.6;}
+  .wrap{max-width:1080px; margin:0 auto; padding:28px 20px 60px;}
+  header.top{text-align:center; padding:26px 16px; background:linear-gradient(180deg,#ffffff, #f7fafc); border:1px solid var(--line); border-radius:16px; margin-bottom:22px;}
+  header.top h1{margin:0 0 6px; font-size:28px; color:var(--brand);}
+  header.top .sub{font-size:17px; color:var(--brand2); font-weight:600; margin-bottom:4px;}
+  header.top .meta{font-size:14px; color:var(--muted2);}
+  .formula{font-size:13px; color:#475569; background:#f1f5f9; border:1px solid var(--line); border-radius:10px; padding:10px 14px; margin:16px 0 22px;}
+  .cards{display:flex; flex-wrap:wrap; gap:14px; margin-bottom:24px;}
+  .card{flex:1; min-width:150px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px;}
+  .card .lbl{font-size:13px; color:var(--muted2); margin-bottom:6px;}
+  .card .val{font-size:28px; font-weight:700; color:var(--ink);}
+  .card .val.pos{color:var(--posd);}
+  .controls{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:8px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px;}
+  .controls label{font-size:14px; color:var(--muted2); font-weight:600;}
+  select{font-family:inherit; font-size:14px; padding:8px 12px; border:1px solid #cbd5e1; border-radius:8px; background:#fff; color:var(--ink); min-width:180px;}
+  select:focus{outline:none; border-color:var(--brand2); box-shadow:0 0 0 3px rgba(46,117,182,.15);}
+  .legend{display:flex; flex-wrap:wrap; gap:18px; margin:16px 2px 18px; font-size:13px; color:var(--muted2);}
+  .legend span{display:flex; align-items:center; gap:6px;}
+  .sw{width:12px; height:12px; border-radius:3px; display:inline-block;}
+  .ranking{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:24px;}
+  .ranking h2{margin:0 0 14px; font-size:18px; color:var(--brand);}
+  .rankrow{display:flex; align-items:center; gap:12px; margin-bottom:10px;}
+  .rankrow .rname{min-width:155px; font-size:14px; font-weight:600;}
+  .rankrow .rbarwrap{flex:1; background:#eef2f7; border-radius:6px; height:22px; position:relative; overflow:hidden;}
+  .rankrow .rbar{height:100%; border-radius:6px; background:var(--pos);}
+  .rankrow .rval{min-width:64px; font-size:13px; font-weight:700; color:var(--posd); text-align:left;}
+  .rankrow .rn{font-size:12px; color:var(--muted2); min-width:78px;}
+  .spec-card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:18px;}
+  .spec-head{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:14px; border-bottom:2px solid #eef2f7; padding-bottom:10px;}
+  .spec-head .stitle{font-size:18px; font-weight:700; color:var(--brand);}
+  .spec-head .sstat{font-size:13px; color:var(--muted2);}
+  .spec-head .sstat b{color:var(--posd);}
+  .chart-wrap{position:relative; width:100%;}
+  .excl{font-size:12.5px; color:var(--negd); margin-top:12px; background:#fdecec; border:1px solid #f7d4d4; border-radius:8px; padding:8px 12px;}
+  footer.foot{text-align:center; font-size:12.5px; color:var(--muted2); margin-top:30px; padding-top:18px; border-top:1px solid var(--line); line-height:1.8;}
+  @media print{
+    body{background:#fff;} .controls{display:none;} .wrap{max-width:100%;}
+    .spec-card,.ranking,.card,header.top{break-inside:avoid;}
+  }
+  @media (max-width:560px){ header.top h1{font-size:22px;} .card .val{font-size:23px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="sub">تقييم متوسط فاعلية التعلم من حيث المعرفة للمتدربين</div>
+    <h1>فارق التحسّن لكل مدرب حسب التخصص</h1>
+    <div class="meta">برنامج المعلمين الجدد &nbsp;•&nbsp; الوحدة الثانية &nbsp;•&nbsp; الدفعة 12</div>
+  </header>
+
+  <div class="formula">
+    <b>المعادلة المعتمدة:</b> النسبة المئوية لمتوسط المعرفة = متوسط مقدار المعرفة ÷ 0.1 (أي مجموع درجات المتدربين ÷ عددهم، من إجمالي 10 درجات). &nbsp; <b>فارق التحسّن</b> = النسبة البعدية − القبلية.
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="lbl">عدد التخصصات</div><div class="val" id="cSpecs">—</div></div>
+    <div class="card"><div class="lbl">عدد المدربين</div><div class="val" id="cTrainers">—</div></div>
+    <div class="card"><div class="lbl">متوسط التحسّن العام</div><div class="val pos" id="cAvg">—</div></div>
+    <div class="card"><div class="lbl">أعلى تحسّن فردي</div><div class="val pos" id="cMax">—</div></div>
+    <div class="card"><div class="lbl">إجمالي الاستجابات</div><div class="val" id="cResp">—</div></div>
+  </div>
+
+  <div class="ranking">
+    <h2>ترتيب التخصصات حسب متوسط التحسّن</h2>
+    <div id="rankList"></div>
+  </div>
+
+  <div class="controls">
+    <label>التخصص:</label>
+    <select id="specSel"><option value="ALL">جميع التخصصات</option></select>
+    <label style="margin-right:6px;">الترتيب:</label>
+    <select id="sortSel">
+      <option value="diff_desc">التحسّن (الأعلى أولاً)</option>
+      <option value="diff_asc">التحسّن (الأقل أولاً)</option>
+      <option value="post_desc">النسبة البعدية (الأعلى)</option>
+      <option value="name">الاسم (أبجدي)</option>
+    </select>
+  </div>
+
+  <div class="legend">
+    <span><span class="sw" style="background:#1D9E75;"></span>فارق التحسّن (نقطة مئوية)</span>
+    <span><span class="sw" style="background:#E24B4A;"></span>تراجع</span>
+    <span style="color:#94a3b8;">الرقم بين قوسين = عدد المتدربين (بعدي)</span>
+  </div>
+
+  <div id="charts"></div>
+
+  <footer class="foot">
+    المصدر: استبانات قياس مستوى التعلم (نماذج Microsoft Forms) — 13 تخصصاً، الوحدة الثانية، الدفعة 12.<br>
+    استُبعد من مخطط التحسّن كل مدرب لا تتوفر لمتدربيه استجابات قبلية وبعدية معاً. تم إعداد اللوحة آلياً.
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script id="payload" type="application/json">[{"spec": "الدراسات الاجتماعية", "n_total": 264, "overall_diff": 6.28, "overall_pre": 91.28, "overall_post": 97.56, "excluded": [], "trainers": [{"name": "خميس الهنائي", "pre": 92.5, "post": 98.75, "diff": 6.25, "post_n": 16}, {"name": "تهاني الشعيبي", "pre": 90.0, "post": 97.55, "diff": 7.55, "post_n": 49}, {"name": "فيصل العامري", "pre": 90.0, "post": 97.5, "diff": 7.5, "post_n": 4}, {"name": "عوض الناصري", "pre": 92.46, "post": 97.35, "diff": 4.89, "post_n": 49}, {"name": "رقية الشبلي", "pre": null, "post": 96.0, "diff": null, "post_n": 5}]}, {"spec": "التربية الخاصة", "n_total": 21, "overall_diff": 18.64, "overall_pre": 66.36, "overall_post": 85.0, "excluded": [], "trainers": [{"name": "كميلاء العجمي", "pre": 66.36, "post": 85.0, "diff": 18.64, "post_n": 10}]}, {"spec": "الرياضيات", "n_total": 1151, "overall_diff": 26.22, "overall_pre": 55.9, "overall_post": 82.11, "excluded": [], "trainers": [{"name": "صالح الزيدي", "pre": 45.54, "post": 90.19, "diff": 44.66, "post_n": 52}, {"name": "الهام الميمني", "pre": 51.67, "post": 86.0, "diff": 34.33, "post_n": 20}, {"name": "عبدالله المجيني", "pre": 64.09, "post": 86.0, "diff": 21.91, "post_n": 20}, {"name": "طلال المسروري", "pre": 53.03, "post": 84.86, "diff": 31.83, "post_n": 35}, {"name": "يوسف الحاتمي", "pre": 58.42, "post": 82.45, "diff": 24.03, "post_n": 49}, {"name": "بخيتة الحاتمي", "pre": 58.26, "post": 82.12, "diff": 23.86, "post_n": 66}, {"name": "سالم الهاجري", "pre": 57.11, "post": 81.7, "diff": 24.6, "post_n": 47}, {"name": "حمود العبدلي", "pre": 52.4, "post": 81.64, "diff": 29.24, "post_n": 55}, {"name": "فهد المدسري", "pre": 56.14, "post": 78.91, "diff": 22.77, "post_n": 55}, {"name": "ناجي الكلباني", "pre": 61.3, "post": 78.75, "diff": 17.45, "post_n": 56}, {"name": "حمد البدواوي", "pre": 71.11, "post": 78.33, "diff": 7.22, "post_n": 12}, {"name": "موسى الهادي", "pre": 53.33, "post": 77.22, "diff": 23.89, "post_n": 18}, {"name": "فدا البلوشي", "pre": 56.67, "post": 73.03, "diff": 16.36, "post_n": 33}]}, {"spec": "اللغة الإنجليزية", "n_total": 923, "overall_diff": 22.92, "overall_pre": 55.4, "overall_post": 78.32, "excluded": ["حليمة الغافري"], "trainers": [{"name": "مريم الغنامي", "pre": 44.12, "post": 87.63, "diff": 43.51, "post_n": 59}, {"name": "عمرو الدفاعي", "pre": 65.59, "post": 82.18, "diff": 16.59, "post_n": 55}, {"name": "منال بيت غريم", "pre": 60.54, "post": 79.14, "diff": 18.6, "post_n": 35}, {"name": "جواهر الطائي", "pre": 62.8, "post": 78.18, "diff": 15.38, "post_n": 55}, {"name": "سميرة السليماني", "pre": 49.12, "post": 77.78, "diff": 28.66, "post_n": 36}, {"name": "علياء الشحي", "pre": 55.25, "post": 76.0, "diff": 20.75, "post_n": 50}, {"name": "فاطمة البلوشي", "pre": 60.25, "post": 76.0, "diff": 15.75, "post_n": 35}, {"name": "أحمد العبري", "pre": 52.94, "post": 74.11, "diff": 21.17, "post_n": 56}, {"name": "اماني الكلباني", "pre": 50.69, "post": 72.41, "diff": 21.72, "post_n": 29}]}, {"spec": "تقنية المعلومات", "n_total": 181, "overall_diff": 7.78, "overall_pre": 68.22, "overall_post": 76.0, "excluded": [], "trainers": [{"name": "محمد الخروصي", "pre": 68.18, "post": 83.6, "diff": 15.42, "post_n": 25}, {"name": "علي العلوي", "pre": 69.15, "post": 73.16, "diff": 4.01, "post_n": 38}, {"name": "راشد الزعابي", "pre": 66.19, "post": 71.18, "diff": 4.99, "post_n": 17}]}, {"spec": "اللغة العربية", "n_total": 654, "overall_diff": 22.11, "overall_pre": 52.07, "overall_post": 74.18, "excluded": ["عامر العيسائي"], "trainers": [{"name": "وليد الكيومي", "pre": 56.11, "post": 79.49, "diff": 23.38, "post_n": 39}, {"name": "محمد البوسعيدي", "pre": 58.86, "post": 78.53, "diff": 19.67, "post_n": 34}, {"name": "خليل السعدي", "pre": 51.82, "post": 72.66, "diff": 20.84, "post_n": 64}, {"name": "أميرة الجهضمي", "pre": 52.13, "post": 71.27, "diff": 19.14, "post_n": 55}, {"name": "هاشم البرزنجي", "pre": 47.07, "post": 70.98, "diff": 23.91, "post_n": 51}, {"name": "ايمان الفارسي", "pre": 48.92, "post": 70.61, "diff": 21.69, "post_n": 33}]}, {"spec": "الرياضة المدرسية", "n_total": 184, "overall_diff": 18.63, "overall_pre": 52.69, "overall_post": 71.32, "excluded": [], "trainers": [{"name": "أحمد الحسني", "pre": 51.43, "post": 80.0, "diff": 28.57, "post_n": 13}, {"name": "شوق الكثيري", "pre": 56.0, "post": 72.75, "diff": 16.75, "post_n": 40}, {"name": "مياء الحبسي", "pre": 49.0, "post": 72.5, "diff": 23.5, "post_n": 24}, {"name": "خالد الحارثي", "pre": 48.57, "post": 57.14, "diff": 8.57, "post_n": 14}]}, {"spec": "الفنون التشكيلية", "n_total": 15, "overall_diff": 11.92, "overall_pre": 55.0, "overall_post": 66.92, "excluded": [], "trainers": [{"name": "ماريا المعولي", "pre": 55.0, "post": 66.92, "diff": 11.92, "post_n": 13}]}, {"spec": "المجال الأول", "n_total": 376, "overall_diff": 5.74, "overall_pre": 59.35, "overall_post": 65.09, "excluded": [], "trainers": [{"name": "شيخة العمري", "pre": 63.64, "post": 78.5, "diff": 14.86, "post_n": 20}, {"name": "د. عبدالله السعدي", "pre": 61.43, "post": 66.55, "diff": 5.12, "post_n": 29}, {"name": "فاطمة رعفيت", "pre": 62.86, "post": 65.33, "diff": 2.48, "post_n": 15}, {"name": "هدى المالكي", "pre": 61.64, "post": 60.45, "diff": -1.18, "post_n": 44}, {"name": "د.ابراهيم الهنائي", "pre": 52.05, "post": 56.47, "diff": 4.42, "post_n": 17}]}, {"spec": "العلوم", "n_total": 916, "overall_diff": 30.25, "overall_pre": 34.04, "overall_post": 64.29, "excluded": [], "trainers": [{"name": "ميثاء البلوشي", "pre": 27.78, "post": 86.67, "diff": 58.89, "post_n": 18}, {"name": "فاطمة الدوحاني", "pre": 28.75, "post": 80.49, "diff": 51.74, "post_n": 41}, {"name": "الشيماء السيابي", "pre": 32.22, "post": 67.03, "diff": 34.8, "post_n": 37}, {"name": "عيسى المنوري", "pre": 39.06, "post": 65.09, "diff": 26.04, "post_n": 53}, {"name": "يعقوب المعولي", "pre": 33.62, "post": 63.4, "diff": 29.78, "post_n": 53}, {"name": "يحيى السناني", "pre": 36.11, "post": 63.14, "diff": 27.03, "post_n": 35}, {"name": "ايناس الجفيلي", "pre": 36.41, "post": 60.71, "diff": 24.3, "post_n": 28}, {"name": "مريم ربيع الجابري", "pre": 35.0, "post": 60.61, "diff": 25.61, "post_n": 33}, {"name": "خولة اليحيائي", "pre": 28.68, "post": 58.11, "diff": 29.42, "post_n": 37}, {"name": "احلام السعدي", "pre": 37.89, "post": 51.07, "diff": 13.18, "post_n": 28}, {"name": "بدرية العريمي", "pre": 31.5, "post": 50.0, "diff": 18.5, "post_n": 9}, {"name": "علي الجساسي", "pre": 41.11, "post": 41.76, "diff": 0.65, "post_n": 17}]}, {"spec": "المجال الثاني", "n_total": 459, "overall_diff": 14.41, "overall_pre": 49.14, "overall_post": 63.55, "excluded": [], "trainers": [{"name": "امينة بيت سعيد", "pre": 50.51, "post": 68.95, "diff": 18.43, "post_n": 38}, {"name": "فاطمة جداد", "pre": 46.25, "post": 67.69, "diff": 21.44, "post_n": 13}, {"name": "باسمة المشايخي", "pre": 48.89, "post": 65.29, "diff": 16.41, "post_n": 17}, {"name": "خالصة الفارسي", "pre": 48.92, "post": 63.81, "diff": 14.89, "post_n": 42}, {"name": "محمد الشحي", "pre": 46.49, "post": 63.53, "diff": 17.04, "post_n": 51}, {"name": "كميلاء العجمي", "pre": 55.0, "post": 58.57, "diff": 3.57, "post_n": 14}, {"name": "بثينة العلوي", "pre": null, "post": 50.0, "diff": null, "post_n": 12}]}, {"spec": "التربية الإسلامية", "n_total": 476, "overall_diff": 21.94, "overall_pre": 34.48, "overall_post": 56.41, "excluded": [], "trainers": [{"name": "فاطمة الشحي", "pre": 38.89, "post": 62.7, "diff": 23.81, "post_n": 37}, {"name": "ايمان الزدجالي", "pre": 32.61, "post": 61.25, "diff": 28.64, "post_n": 16}, {"name": "خالد الخروصي", "pre": 33.57, "post": 56.56, "diff": 22.99, "post_n": 32}, {"name": "حمود الجابري", "pre": 37.46, "post": 53.79, "diff": 16.33, "post_n": 66}, {"name": "بدر البكاري", "pre": 33.53, "post": 50.61, "diff": 17.08, "post_n": 33}, {"name": "حفيظة الشرجي", "pre": 34.55, "post": 50.59, "diff": 16.04, "post_n": 34}]}, {"spec": "المهارات الموسيقية", "n_total": 94, "overall_diff": 2.29, "overall_pre": 29.29, "overall_post": 31.58, "excluded": [], "trainers": [{"name": "الغالية المطاعنية", "pre": 32.5, "post": 37.37, "diff": 4.87, "post_n": 19}, {"name": "دانية الزدجالية", "pre": 26.88, "post": 25.79, "diff": -1.09, "post_n": 19}]}]</script>
+<script>
+(function(){
+  const DATA = JSON.parse(document.getElementById('payload').textContent);
+
+  // ---- summary ----
+  const allD = [];
+  let totalResp = 0;
+  DATA.forEach(s => { totalResp += s.n_total; s.trainers.forEach(t => { if(t.diff!==null) allD.push({spec:s.spec, ...t}); }); });
+  const nTrainers = DATA.reduce((a,s)=>a+s.trainers.length,0);
+  const avg = allD.reduce((a,b)=>a+b.diff,0)/allD.length;
+  const mx = allD.reduce((a,b)=> b.diff>a.diff?b:a);
+  document.getElementById('cSpecs').textContent = DATA.length;
+  document.getElementById('cTrainers').textContent = nTrainers;
+  document.getElementById('cAvg').textContent = '+'+avg.toFixed(1)+'%';
+  document.getElementById('cMax').textContent = '+'+mx.diff.toFixed(1)+'%';
+  document.getElementById('cResp').textContent = totalResp.toLocaleString('en-US');
+
+  // ---- spec ranking ----
+  const ranked = [...DATA].sort((a,b)=>b.overall_diff-a.overall_diff);
+  const maxOv = Math.max(...ranked.map(s=>s.overall_diff));
+  const rl = document.getElementById('rankList');
+  ranked.forEach(s=>{
+    const row=document.createElement('div'); row.className='rankrow';
+    const w = Math.max(4, (s.overall_diff/maxOv)*100);
+    row.innerHTML =
+      '<div class="rname">'+s.spec+'</div>'+
+      '<div class="rbarwrap"><div class="rbar" style="width:'+w+'%;"></div></div>'+
+      '<div class="rval">+'+s.overall_diff.toFixed(1)+'%</div>'+
+      '<div class="rn">'+s.trainers.length+' مدرب</div>';
+    rl.appendChild(row);
+  });
+
+  // ---- spec selector ----
+  const specSel = document.getElementById('specSel');
+  DATA.forEach(s => { const o=document.createElement('option'); o.value=s.spec; o.textContent=s.spec; specSel.appendChild(o); });
+
+  const POS='#1D9E75', POSB='rgba(29,158,117,0.85)', NEG='#E24B4A', NEGB='rgba(226,75,74,0.85)';
+  const charts=[];
+  function destroy(){ charts.forEach(c=>c.destroy()); charts.length=0; }
+
+  function sortT(arr,mode){
+    const a=[...arr];
+    if(mode==='diff_desc') a.sort((x,y)=>y.diff-x.diff);
+    else if(mode==='diff_asc') a.sort((x,y)=>x.diff-y.diff);
+    else if(mode==='post_desc') a.sort((x,y)=>y.post-x.post);
+    else if(mode==='name') a.sort((x,y)=>x.name.localeCompare(y.name,'ar'));
+    return a;
+  }
+
+  function render(){
+    destroy();
+    const cont=document.getElementById('charts'); cont.innerHTML='';
+    const selSpec=specSel.value, sortMode=document.getElementById('sortSel').value;
+    const specs = selSpec==='ALL'?DATA:DATA.filter(s=>s.spec===selSpec);
+
+    specs.forEach(s=>{
+      const valid=s.trainers.filter(t=>t.diff!==null);
+      const rows=sortT(valid,sortMode);
+      const idx=DATA.indexOf(s)+1;
+
+      const card=document.createElement('div'); card.className='spec-card';
+      const head=document.createElement('div'); head.className='spec-head';
+      head.innerHTML='<div class="stitle">الشكل ('+idx+'): تخصص '+s.spec+'</div>'+
+        '<div class="sstat">متوسط التحسّن: <b>+'+s.overall_diff.toFixed(1)+'%</b> &nbsp;•&nbsp; قبلي '+s.overall_pre.toFixed(1)+'% ← بعدي '+s.overall_post.toFixed(1)+'% &nbsp;•&nbsp; '+rows.length+' مدرب</div>';
+      card.appendChild(head);
+
+      const cw=document.createElement('div'); cw.className='chart-wrap';
+      const h=Math.max(rows.length*40+60,130);
+      cw.style.height=h+'px';
+      const cv=document.createElement('canvas');
+      cv.setAttribute('role','img');
+      cv.setAttribute('aria-label','فارق التحسّن لمدربي تخصص '+s.spec);
+      cv.textContent=rows.map(r=>r.name+': '+r.diff+'%').join('، ');
+      cw.appendChild(cv); card.appendChild(cw);
+
+      if(s.excluded && s.excluded.length){
+        const ex=document.createElement('div'); ex.className='excl';
+        ex.textContent='استُبعد لعدم توفر قياس قبلي وبعدي معاً: '+s.excluded.join('، ')+'.';
+        card.appendChild(ex);
+      }
+      cont.appendChild(card);
+
+      const labels=rows.map(r=>r.name+'  ('+r.post_n+')');
+      const vals=rows.map(r=>+r.diff.toFixed(2));
+      const bg=rows.map(r=>r.diff<0?NEGB:POSB);
+      const bd=rows.map(r=>r.diff<0?NEG:POS);
+
+      const ch=new Chart(cv,{
+        type:'bar',
+        data:{labels,datasets:[{data:vals,backgroundColor:bg,borderColor:bd,borderWidth:1,borderRadius:4,barThickness:22}]},
+        options:{
+          indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          layout:{padding:{right:46,left:4}},
+          plugins:{
+            legend:{display:false},
+            tooltip:{rtl:true, titleFont:{family:'Segoe UI'}, bodyFont:{family:'Segoe UI'}, callbacks:{
+              title:(it)=>rows[it[0].dataIndex].name,
+              label:(it)=>{const r=rows[it.dataIndex]; return ['قبلي: '+r.pre.toFixed(1)+'%','بعدي: '+r.post.toFixed(1)+'%','فارق التحسّن: '+(r.diff>=0?'+':'')+r.diff.toFixed(1)+'%','عدد المتدربين: '+r.post_n];}
+            }}
+          },
+          scales:{
+            x:{beginAtZero:true, grid:{color:'rgba(100,116,139,0.12)'}, ticks:{callback:(v)=>v+'%',font:{size:11,family:'Segoe UI'}}},
+            y:{grid:{display:false}, ticks:{font:{size:12.5,family:'Segoe UI'},color:'#1a2230',crossAlign:'far',autoSkip:false}}
+          },
+          animation:{duration:350}
+        },
+        plugins:[{
+          id:'vlabels',
+          afterDatasetsDraw(chart){
+            const {ctx}=chart, meta=chart.getDatasetMeta(0);
+            ctx.save(); ctx.font='700 11px "Segoe UI"'; ctx.textBaseline='middle';
+            meta.data.forEach((bar,i)=>{
+              const v=vals[i];
+              ctx.fillStyle=v<0?'#A32D2D':'#0F6E56';
+              ctx.textAlign=v<0?'right':'left';
+              ctx.fillText((v>=0?'+':'')+v.toFixed(1)+'%', bar.x+(v<0?-6:6), bar.y);
+            });
+            ctx.restore();
+          }
+        }]
+      });
+      charts.push(ch);
+    });
+  }
+
+  specSel.addEventListener('change',render);
+  document.getElementById('sortSel').addEventListener('change',render);
+  render();
+})();
+</script>
+</body>
+</html>
